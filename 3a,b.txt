@@ -1,0 +1,80 @@
+
+3a)
+
+I -> tI1cI2fI3  {I.tipo <- I3.tipo}
+   | tI1cI2     {I.tipo <- Either I2.tipo I1.tipo } 
+   | I1;I2      {I.tipo <- I2.tipo} 
+   | i          {I.tipo <- i.tipo}
+
+3b)
+
+Construyendo gramatica L atribuida:
+
+I -> tIcIfI
+   | tIcI
+   | I;I
+   | i 
+
++ Quitando simbolo inicial recursivo:
+
+   S -> I 
+   I -> tIcIfI
+      | tIcI
+      | I;I
+      | i 
+
++ Eliminando recursion a izquierda:
+
+   S -> B
+   B -> I C 
+   C -> ; I C 
+      | lambda
+   I -> tBcBfB
+      | tBcB
+      | i 
+
++ Eliminando prefijos comunes:
+
+   S -> B
+   B -> I C
+   C -> ; I C
+      | lambda
+   I -> tBcBJ
+      | i          
+   J -> fB
+      | lambda
+
+En definitivo:
+                  Lookahead
+   S -> B       | t,i
+   B -> I C     | t,i
+   C -> ; I C   | ;
+      | lambda  | c,f,$ 
+   I -> tBcBJ   | t
+      | i       | i
+   J -> fB      | f 
+      | lambda  | c,;,$
+
+    first    follow
+  -------------------
+S | t,i      $          
+B | t,i      c,f,;,$
+C | ;,$,c,f  c,f,;,$
+I | t,i      ;,c,f,$
+J | f,;,$,c    ;,c,f,$
+
++ Se agregan ahora las asignaciones de tipo:
+
+   S -> B       { S.tipo <- B.tipo }
+   B -> I C     { C.pre  <- I.tipo 
+                  B.tipo <- C.tipo }
+   C -> ; I C1  { C1.pre <- I.tipo      
+                  C.tipo <- C1.tipo }
+      | lambda  { C.tipo <- C.pre }
+   I -> tB1cB2J { J.pre  <- Either B2.tipo B1.tipo 
+                  I.tipo <- J.tipo }
+      | i       { I.tipo <- i.tipo }  
+   J -> fB      { J.tipo <- B.tipo }
+      | lambda  { J.tipo <- J.pre }
+
+en donde tipo es un atributo sintetico y pre es un atributo heredado.

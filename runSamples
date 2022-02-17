@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for i in `ls samples` ; do 
+    echo "$i: " ; 
+    echo -e "\t `runhaskell TryCatch.hs < samples/$i`" ;
+done
